@@ -5,6 +5,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Text } from '@/components/ui/text';
 import { useAuth, useUser } from '@clerk/clerk-expo';
 import type { TriggerRef } from '@rn-primitives/popover';
+import { useRouter } from 'expo-router';
 import { LogOutIcon, PlusIcon, SettingsIcon } from 'lucide-react-native';
 import * as React from 'react';
 import { View } from 'react-native';
@@ -12,11 +13,13 @@ import { View } from 'react-native';
 export function UserMenu() {
   const { user } = useUser();
   const { signOut } = useAuth();
+  const router = useRouter();
   const popoverTriggerRef = React.useRef<TriggerRef>(null);
 
   async function onSignOut() {
     popoverTriggerRef.current?.close();
     await signOut();
+    router.replace('/');
   }
 
   return (

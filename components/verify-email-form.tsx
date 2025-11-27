@@ -32,6 +32,7 @@ export function VerifyEmailForm() {
       // and redirect the user
       if (signUpAttempt.status === 'complete') {
         await setActive({ session: signUpAttempt.createdSessionId });
+        router.replace('/dashboard');
         return;
       }
       // TODO: Handle other statuses

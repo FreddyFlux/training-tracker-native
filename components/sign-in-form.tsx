@@ -34,6 +34,7 @@ export function SignInForm() {
       if (signInAttempt.status === 'complete') {
         setError({ email: '', password: '' });
         await setActive({ session: signInAttempt.createdSessionId });
+        router.replace('/dashboard');
         return;
       }
       // TODO: Handle other statuses

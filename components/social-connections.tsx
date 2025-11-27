@@ -56,7 +56,8 @@ export function SocialConnections() {
 
         // If sign in was successful, set the active session
         if (createdSessionId && setActive) {
-          setActive({ session: createdSessionId });
+          await setActive({ session: createdSessionId });
+          router.replace('/dashboard');
           return;
         }
 
