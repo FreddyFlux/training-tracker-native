@@ -43,6 +43,7 @@ function DashboardHeader() {
 }
 
 const SCREEN_OPTIONS = {
+  headerShown: true,
   header: () => <DashboardHeader />,
 };
 
@@ -52,6 +53,7 @@ export default function DashboardScreen() {
   // Convex queries - using existing functions from the web app
   const currentUser = useQuery(api.users.getCurrentUser);
   const activePlan = useQuery(api.workoutPlans.getActive);
+  const activeWorkout = useQuery(api.workoutLogs.getActive);
   const dashboardStats = useQuery(api.workoutLogs.getDashboardStats);
   const recentActivity = useQuery(api.workoutLogs.getRecentActivity, { limit: 5 });
 
@@ -144,14 +146,17 @@ export default function DashboardScreen() {
               <View className="flex-row gap-3">
                 <Button
                   size="lg"
-                  onPress={() => router.push(`/dashboard/workout-plans/${activePlan.slug}`)}>
+                  onPress={() => {
+                    if (activeWorkout) {
+                      router.push('/active-workout');
+                    } else {
+                      router.push(`/workout-plans/${activePlan.slug}`);
+                    }
+                  }}>
                   <Dumbbell size={20} color="white" style={{ marginRight: 8 }} />
-                  <Text>Go to Workout</Text>
+                  <Text>{activeWorkout ? 'Continue Workout' : 'Go to Workout'}</Text>
                 </Button>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  onPress={() => router.push('/dashboard/workout-plans')}>
+                <Button variant="outline" size="lg" onPress={() => router.push('/workout-plans')}>
                   <Text>View All Plans</Text>
                 </Button>
               </View>
@@ -166,19 +171,11 @@ export default function DashboardScreen() {
                 Create a workout plan to start tracking your training progress
               </Text>
               <View className="flex-row gap-3">
-                <Button
-                  size="lg"
-                  onPress={() => {
-                    // TODO: Open create plan dialog
-                    router.push('/dashboard/workout-plans');
-                  }}>
+                <Button size="lg" onPress={() => router.push('/workout-plans')}>
                   <Plus size={20} color="white" style={{ marginRight: 8 }} />
                   <Text>Create Workout Plan</Text>
                 </Button>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  onPress={() => router.push('/dashboard/workout-plans')}>
+                <Button variant="outline" size="lg" onPress={() => router.push('/workout-plans')}>
                   <Text>View All Plans</Text>
                 </Button>
               </View>
@@ -242,7 +239,7 @@ export default function DashboardScreen() {
               <Text className="mb-4 flex-1 text-sm text-zinc-600 dark:text-zinc-400">
                 View detailed statistics and insights about your workout history
               </Text>
-              <Button className="w-full" onPress={() => router.push('/dashboard/workout-logs')}>
+              <Button className="w-full" disabled>
                 <BarChart3 size={16} color="white" style={{ marginRight: 8 }} />
                 <Text>View Stats</Text>
               </Button>
@@ -274,15 +271,17 @@ export default function DashboardScreen() {
                   };
 
                   // Get the view link based on activity type
-                  const getViewLink = () => {
+                  const getViewLink = (): string => {
                     if (activityItem.type === 'workout_log') {
-                      return `/dashboard/workout-logs/${activityItem._id}`;
+                      // Workout log detail page doesn't exist yet
+                      return '/dashboard';
                     } else if (activityItem.type === 'shared_workout') {
-                      return `/workouts/${activityItem.sharedWorkoutId}`;
+                      // Shared workout page doesn't exist yet
+                      return '/dashboard';
                     } else if (activityItem.type === 'shared_plan') {
                       return `/workout-plans/${activityItem.planSlug}`;
                     }
-                    return '#';
+                    return '/dashboard';
                   };
 
                   // Format the activity description
@@ -320,7 +319,10 @@ export default function DashboardScreen() {
                           })}
                         </Text>
                       </View>
-                      <Button variant="ghost" size="sm" onPress={() => router.push(getViewLink())}>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onPress={() => router.push(getViewLink() as any)}>
                         <Text>View</Text>
                       </Button>
                     </View>

@@ -14,6 +14,7 @@ import { useColorScheme } from 'nativewind';
 import * as React from 'react';
 import { LogBox } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 // Suppress SafeAreaView deprecation warning from dependencies
 // This warning comes from dependencies that haven't updated yet
@@ -35,7 +36,7 @@ export default function RootLayout() {
 
   const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
   const convexUrl = process.env.EXPO_PUBLIC_CONVEX_URL;
-  
+
   if (!publishableKey) {
     throw new Error(
       'Missing Clerk Publishable Key. Please set EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY in your environment variables.'
@@ -51,17 +52,19 @@ export default function RootLayout() {
   const convex = new ConvexReactClient(convexUrl);
 
   return (
-    <SafeAreaProvider>
-      <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
-        <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
-          <ThemeProvider value={NAV_THEME[colorScheme ?? 'light']}>
-            <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
-            <Routes />
-            <PortalHost />
-          </ThemeProvider>
-        </ConvexProviderWithClerk>
-      </ClerkProvider>
-    </SafeAreaProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+          <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
+            <ThemeProvider value={NAV_THEME[colorScheme ?? 'light']}>
+              <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
+              <Routes />
+              <PortalHost />
+            </ThemeProvider>
+          </ConvexProviderWithClerk>
+        </ClerkProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
 
@@ -93,7 +96,10 @@ function Routes() {
 
       {/* Screens only shown when the user IS signed in */}
       <Stack.Protected guard={isSignedIn}>
-        <Stack.Screen name="dashboard" options={{ headerShown: false }} />
+        <Stack.Screen name="dashboard" />
+        <Stack.Screen name="active-workout" />
+        {/* Workout plans routes are handled by nested stack in workout-plans/_layout.tsx */}
+        <Stack.Screen name="workout-plans" options={{ headerShown: false }} />
       </Stack.Protected>
 
       {/* Screens outside the guards are accessible to everyone (e.g. not found) */}

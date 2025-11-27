@@ -168,10 +168,20 @@ export const getActiveWithDetails = query({
       exerciseSets.sort((a, b) => a.setNumber - b.setNumber);
     }
 
+    // Get plan slug if planId exists
+    let planSlug: string | null = null;
+    if (log.planId) {
+      const plan = await ctx.db.get(log.planId);
+      if (plan) {
+        planSlug = plan.slug;
+      }
+    }
+
     return {
       ...log,
       workout,
       setsByExercise: Object.fromEntries(setsByExercise),
+      planSlug,
     };
   },
 });
